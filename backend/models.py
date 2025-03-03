@@ -10,7 +10,7 @@ import requests_cache
 from retry_requests import retry
 
 class base():
-    def __init__(self, city, date_from, date_to interval):
+    def __init__(self, city, date_from, date_to, interval):
         self.url = "https://api.open-meteo.com/v1/forecast" #url for get data
         
         self.geolocator = Nominatim(user_agent="giv_long_latitude") # create geolocator
