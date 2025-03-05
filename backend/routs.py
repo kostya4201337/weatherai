@@ -55,8 +55,8 @@ async def prediction(params : QueryParams = Depends()):
             )
         else:
             try:
-                from_date = datetime.datetime.strptime(params.date_from, '%Y-%m-%dT%H:%M%z')
-                to_date = datetime.datetime.strptime(params.date_to, '%Y-%m-%dT%H:%M%z')
+                date_from = datetime.datetime.strptime(params.date_from, '%Y-%m-%dT%H:%M%z')
+                date_to = datetime.datetime.strptime(params.date_to, '%Y-%m-%dT%H:%M%z')
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -64,10 +64,21 @@ async def prediction(params : QueryParams = Depends()):
                 )
             print(params.date_from, params.date_to)
     else:
-        raise HTTPException(
+        if params.period:
+            now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+            date_from = now - params.period
+            date_to = now
+        else:
+            raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f'You must provide date range',
             )
+    try:
+        data = base(city = params.city, date_from = date_from, date_to=date_to, interval=params.interval).__give_prediction__()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    finally:
+        return {'data' : data}
 
 if __name__ == "__main__":
     uvicorn.run("routs:APP", host="192.168.0.133", port=5000, reload=True)

@@ -22,8 +22,9 @@ class base():
         
         # local varibles
         self.city = city
-        self.periods = periods
         self.interval = interval
+        self.date_from = date_from
+        self.date_to = date_to
         
         # geodata
         location = self.geolocator.geocode(self.city)
@@ -63,13 +64,11 @@ class base():
         else:
             return str("Местоположение не найдено")
         
-        print(self.periods[0], self.periods[1])
-        self.periods[0], self.periods[1] = self.periods[0]-datetime.timedelta(hours=-self.offset_int), self.periods[1]-datetime.timedelta(hours = -self.offset_int)
-        print(self.periods[0], self.periods[1])
-        print(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)-datetime.timedelta(hours=-self.offset_int))
+        print(date_from, date_to)
         
     def __give_prediction__ (self):
-        data_period = self.periods[0]-datetime.timedelta(days = 3)
+        data_period_from = self.date_from-datetime.timedelta(days = 3)
+        data_period_to = self.date_from-datetime.timedelta(days = 3)
         time_difference = self.periods[1] - self.periods[0]
         print(time_difference.total_seconds())
         if time_difference.total_seconds() < 0:
@@ -85,14 +84,16 @@ class base():
             "latitude": self.latitude,
             "longitude": self.longitude,
             "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation_probability", "precipitation", "rain", "showers", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "visibility", "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m", "wind_direction_10m", "wind_direction_80m", "wind_direction_120m", "wind_direction_180m", "wind_gusts_10m", "temperature_80m", "temperature_120m", "temperature_180m", "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm", "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"],
-            "start_date": f"{(str(data_period).split( )[0])}",
-            "end_date": f"{self.periods[0].strftime('%Y-%m-%d')}",
+            "start_date": f"{(str(data_period_from))}",
+            "end_date": f"{str(self.date_to)}",
         }
+        
+        print(params)
 
-        self.responses = self.openmeteo.weather_api(self.url, params=params)
+        # self.responses = self.openmeteo.weather_api(self.url, params=params)
         
         # Process first location. Add a for-loop for multiple locations or weather models
-        r = self.__get_data__()
+        # r = self.__get_data__()
         
         # url = f'https://archive-api.open-meteo.com/v1/archive?latitude={latitude}&longitude={longitude}&start_date={(str(data_period).split( )[0])}&end_date={self.periods[0]}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,et0_fao_evapotranspiration,vapour_pressure_deficit,wind_speed_10m,wind_speed_100m,wind_direction_10m,wind_direction_100m,wind_gusts_10m,soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm,soil_temperature_100_to_255cm,soil_moisture_0_to_7cm,soil_moisture_7_to_28cm,soil_moisture_28_to_100cm,soil_moisture_100_to_255cm&daily='
         # print(0)
@@ -100,7 +101,7 @@ class base():
         # r = r.json()
         # df = pd.DataFrame.from_dict(pd.json_normalize(r), orient='columns')
         # print(r)
-        r.to_csv('adada.csv')
+        # r.to_csv('adada.csv')
         # else:
             
         #     # Make sure all required weather variables are listed here
@@ -125,7 +126,8 @@ class base():
         #     # df = pd.DataFrame.from_dict(r, orient='columns')
         #     r.to_csv('adada.csv')
         #     # print(r)
-        return str(r)
+        # return str(r)
+        return 0
     
     def __get_data__(self):
         """__get_data__ this is function for get data from url
