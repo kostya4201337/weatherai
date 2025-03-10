@@ -10,7 +10,7 @@ import requests_cache
 from retry_requests import retry
 
 class base():
-    def __init__(self, city, date_from, date_to, interval):
+    def __init__(self, city : str, date_from : datetime.datetime, date_to : datetime.datetime, interval : str):
         self.url = "https://api.open-meteo.com/v1/forecast" #url for get data
         
         self.geolocator = Nominatim(user_agent="giv_long_latitude") # create geolocator
@@ -67,13 +67,13 @@ class base():
         print(date_from, date_to)
         
     def __give_prediction__ (self):
-        data_period_from = self.date_from-datetime.timedelta(days = 3)
-        data_period_to = self.date_from-datetime.timedelta(days = 3)
-        time_difference = self.periods[1] - self.periods[0]
-        print(time_difference.total_seconds())
+        # data_period_from = self.date_from-datetime.timedelta(days = 3)
+        # data_period_to = self.date_from-datetime.timedelta(days = 3)
+        time_difference = self.date_to-self.date_from
         if time_difference.total_seconds() < 0:
             return str('not correct data period')
-        total_hours = abs(time_difference.total_seconds() / 3600)
+        total_seconds = time_difference.total_seconds()
+        print(total_days = total_seconds // (24 * 3600))
         
         
         # if self.periods[0] > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)-datetime.timedelta(hours=-self.offset_int):

@@ -2,17 +2,16 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from fastapi import Query
 from dataclasses import dataclass
-from datetime import timedelta
 
 class IntervalEnum(str, Enum):
     HOURLY = "hourly"
     DAILY = "daily"
 
-class PeriodEnum(timedelta, Enum):
-    HOUR = timedelta(hours=1)
-    DAY = timedelta(days=1)
-    WEEK = timedelta(weeks=1)
-    MONTH = timedelta(weeks=4)
+class PeriodEnum(str, Enum):
+    HOUR = 'hour'
+    DAY = 'day'
+    WEEK = 'week'
+    MONTH = 'month'
 
 # @dataclass
 class QueryParams(BaseModel):
