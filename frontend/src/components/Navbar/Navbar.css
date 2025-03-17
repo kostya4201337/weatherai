@@ -1,0 +1,39 @@
+.navbar {
+    background-color: #12779e;
+    display: flex;
+    width: 100vi;
+    height: 8vh;
+    padding-left: 20px;
+    margin-left: -20px;
+    padding-right: 20px;
+    margin-right: -20px;
+    filter: drop-shadow(5px 5px 50px rgba(0, 0, 0, 0.4))
+}
+
+.buttons-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: inherit;
+    padding-left: 4vi;
+}
+
+.button {
+    padding-right: 3vi;
+    /*text-shadow: 0px 2px 5px rgba(0, 0, 0, 0.4);*/
+    filter: drop-shadow(-1px 2px 1px rgba(0, 0, 0, 0.5));
+}
+
+.logo {
+    margin-top: 1vh;
+    width: 11vi;
+}
+
+.about-icon {
+    width: 2vi;
+}
+
+.about-container {
+    position: absolute;
+    right: 4vi;
+}
