@@ -1,10 +1,15 @@
-import React from 'react';
+// import React from 'react';
+
+import {Navbar} from "./components/Navbar/Navbar.tsx";
+import {Outlet} from "react-router-dom";
+
 
 function App() {
   return (
-      <a>
-        Hello World!
-      </a>
+      <>
+          <Navbar/>
+          <Outlet/>
+      </>
   );
 }
 

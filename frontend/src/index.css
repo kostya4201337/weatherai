@@ -1,0 +1,60 @@
+@font-face {
+  font-family: "RubikBold";
+  src: local("RubikBold"),
+  url("./fonts/rubik/Rubik-Bold.ttf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "RubikRegular";
+  src: local("RubikRegular"),
+  url("./fonts/rubik/Rubik-Regular.ttf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "RubikLight";
+  src: local("RubikLight"),
+  url("./fonts/rubik/Rubik-Light.ttf") format("opentype");
+  font-weight: normal;
+}
+
+:root {
+  font-family: RubikLight;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(0, 0, 0, 0.87);
+  background-image: linear-gradient(to bottom, #006b93 0%, #3da2c6 30%, #97cfe3 55%, #ffffff 80%, #ffffff 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  font-weight: 500;
+  color: #ffffff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #ffffff;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+p {
+  display: block;
+  margin-block-start: 0em !important;
+  margin-block-end: 0em !important;
+  margin-inline-start: 0px !important;
+  margin-inline-end: 0px !important;
+  unicode-bidi: isolate;
+}

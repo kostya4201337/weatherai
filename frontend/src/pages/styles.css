@@ -1,0 +1,9 @@
+.page-container {
+    margin-left: 5vi;
+    margin-right: 5vi;
+    margin-top: 6vh;
+    color: white;
+    /*text-shadow: -2px 3px 2px rgba(0, 0, 0, 0.5);*/
+    filter: drop-shadow(-2px 3px 2px rgba(0, 0, 0, 0.4));
+}
+

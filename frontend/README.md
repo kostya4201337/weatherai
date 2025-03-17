@@ -1,7 +1,5 @@
-# Frontend
-
-Web application for weather forecast.
-
-### How to start
-
-- write in terminal: **npm start**
+how to run:
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
+4. profit
