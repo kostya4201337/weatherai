@@ -107,3 +107,54 @@
     width: 100%;
     justify-content: flex-end;
 }
+
+.ten-days-container {
+    background-color: #F4F4F4;
+    margin-top: 6rem;
+    padding-bottom: 24rem;
+    border-radius: 1rem;
+    margin-bottom: 3rem;
+    /*overflow: clip;*/
+    /*width: 20rem;*/
+    position: absolute;
+    top: 24rem;
+    left: 5vi;
+    right: 5vi;
+    bottom: 0;
+}
+
+.ten-days-container-title {
+    font-family: RubikBold !important;
+    font-size: 2rem;
+    line-height: 2rem;
+    color: black;
+}
+
+.ten-days-wrap {
+    padding: 1.8rem;
+
+}
+
+.days-scroll-list {
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    /*display: flex;*/
+    /*display: inline-block;*/
+    overflow-x: scroll;
+    white-space: nowrap;
+    /*width: 77.4rem;*/
+}
+
+.days-scroll-list::-webkit-scrollbar-thumb {
+    background: #d6d6d6;
+    border-radius: 0.5rem;
+}
+
+.days-scroll-list::-webkit-scrollbar {
+    height: 0.8rem;
+}
+
+.days-scroll-list::-webkit-scrollbar-track {
+    background: #eaeaea;
+    border-radius: 0.5rem;
+}

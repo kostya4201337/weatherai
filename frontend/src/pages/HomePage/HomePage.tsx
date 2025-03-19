@@ -7,15 +7,16 @@ import wetIcon from "../../assets/sideInfoIcons/wet-icon.png"
 import HourStatus from "./components/HourStatus/HourStatus.tsx"
 import {WeatherTypes} from "../../common/constants/weatherTypes.ts";
 import clearBackground from "../../assets/weatherBackgrounds/clear-background.png"
+import DayForecast from "./components/DayForecast/DayForecast.tsx";
 
 export default function HomePage() {
     return (
       <div className="page-container">
-          <div className="inline-div">
+          <div className="inline-div upper-half">
               <div className="vert-div">
                   <div>
                       <p className="location-text">Иркутск, микрорайон Университетский</p>
-                      <p className="date-text">1 апреля, сейчас 14:88</p>
+                      <p className="date-text">1 апреля, воскресенье, сейчас 14:88</p>
                   </div>
                   <div className="inline-div">
                       <p className="current-temp-text">+19°</p>
@@ -65,6 +66,42 @@ export default function HomePage() {
                       <div>
                           <img src={clearBackground} alt="clear-background" className="background"/>
                       </div>
+                  </div>
+              </div>
+          </div>
+          <div className="ten-days-container">
+              <div className="ten-days-wrap">
+                  <p className="ten-days-container-title">Прогноз на 10 дней</p>
+                  <div className="inline-div days-scroll-list">
+                      <DayForecast weekDay="Пн" day={13} month="Декабрь" tempDay={-15} tempNight={-21}
+                                   tempFeeling={-19} type={WeatherTypes.SNOW} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Вт" day={14} month="Декабрь" tempDay={-20} tempNight={-30}
+                                   tempFeeling={-24} type={WeatherTypes.SNOW} wind={20} windDirection="З"
+                                   pressure={709} wet={80}/>
+                      <DayForecast weekDay="Ср" day={15} month="Декабрь" tempDay={0} tempNight={10} tempFeeling={-5}
+                                   type={WeatherTypes.RAIN} wind={3} windDirection="СЗ" pressure={654} wet={10}/>
+                      <DayForecast weekDay="Чт" day={16} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.CLEAR} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Пт" day={17} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.CLOUDY} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Сб" day={18} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.SNOW} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Вс" day={19} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.OVERCAST} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Пн" day={19} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.OVERCAST} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Вт" day={19} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.OVERCAST} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
+                      <DayForecast weekDay="Ср" day={19} month="Декабрь" tempDay={21} tempNight={-9}
+                                   tempFeeling={19} type={WeatherTypes.OVERCAST} wind={10} windDirection="ЮВ"
+                                   pressure={728} wet={40}/>
                   </div>
               </div>
           </div>

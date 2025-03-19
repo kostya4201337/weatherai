@@ -9,6 +9,7 @@ function App() {
       <>
           <Navbar/>
           <Outlet/>
+          <footer className="footer">©2024–2025 weather.ai</footer>
       </>
   );
 }
