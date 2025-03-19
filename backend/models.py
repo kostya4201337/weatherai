@@ -8,6 +8,7 @@ import pandas as pd
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
+import json
 
 class base():
     def __init__(self, city : str, date_from : datetime.datetime, date_to : datetime.datetime, interval : str):
@@ -16,7 +17,7 @@ class base():
         self.geolocator = Nominatim(user_agent="giv_long_latitude") # create geolocator
         
         # Setup the Open-Meteo API client with cache and retry on error
-        cache_session = requests_cache.CachedSession('.cache', expire_after = -1)
+        cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
         retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
         self.openmeteo = openmeteo_requests.Client(session = retry_session)
         
@@ -42,23 +43,23 @@ class base():
                 tz = pytz.timezone(timezone_name)
 
                 # now time
-                current_time = datetime.datetime.now(tz)
+                # current_time = datetime.datetime.now(tz)
 
                 # смещение
-                utc_offset_timedelta = current_time.utcoffset()
+                # utc_offset_timedelta = current_time.utcoffset()
 
-                # Преобразуем смещение в часы
-                total_seconds = utc_offset_timedelta.total_seconds()
-                utc_offset_hours = total_seconds / 3600
+                # # Преобразуем смещение в часы
+                # total_seconds = utc_offset_timedelta.total_seconds()
+                # utc_offset_hours = total_seconds / 3600
 
-                # Форматируем смещение для вывода (учитываем знак)
-                if utc_offset_hours >= 0:
-                    self.offset_int = utc_offset_hours
-                else:
-                    self.offset_int = -utc_offset_hours
+                # # Форматируем смещение для вывода (учитываем знак)
+                # if utc_offset_hours >= 0:
+                #     self.offset_int = utc_offset_hours
+                # else:
+                #     self.offset_int = -utc_offset_hours
 
-                print(f"Часовой пояс: {timezone_name}")
-                print(f"Смещение от UTC: {self.offset_int}")
+                # print(f"Часовой пояс: {timezone_name}")
+                # print(f"Смещение от UTC: {self.offset_int}")
             else:
                 return str("time is not available, check your city and country")
         else:
@@ -69,65 +70,87 @@ class base():
     def __give_prediction__ (self):
         # data_period_from = self.date_from-datetime.timedelta(days = 3)
         # data_period_to = self.date_from-datetime.timedelta(days = 3)
-        time_difference = self.date_to-self.date_from
-        if time_difference.total_seconds() < 0:
-            return str('not correct data period')
-        total_seconds = time_difference.total_seconds()
-        print(total_days = total_seconds // (24 * 3600))
+        # time_difference = self.date_to-self.date_from
+        # if time_difference.total_seconds() < 0:
+        #     return str('not correct data period')
+        # total_seconds = time_difference.total_seconds()
+        # print(total_days = total_seconds // (24 * 3600))
         
         
         # if self.periods[0] > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)-datetime.timedelta(hours=-self.offset_int):
         
         # Make sure all required weather variables are listed here
         # The order of variables in hourly or daily is important to assign them correctly below
+        # params = {
+        #     "latitude": self.latitude,
+        #     "longitude": self.longitude,
+        #     "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation_probability", "precipitation", "rain", "showers", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "visibility", "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m", "wind_direction_10m", "wind_direction_80m", "wind_direction_120m", "wind_direction_180m", "wind_gusts_10m", "temperature_80m", "temperature_120m", "temperature_180m", "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm", "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"],
+        #     # "start_date": f"{(str(data_period_from))}",
+        #     "end_date": f"{str(self.date_to)}",
+        # }
+        
+        # print(params)
+        
+        url = "https://api.open-meteo.com/v1/forecast"
         params = {
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation_probability", "precipitation", "rain", "showers", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "visibility", "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m", "wind_direction_10m", "wind_direction_80m", "wind_direction_120m", "wind_direction_180m", "wind_gusts_10m", "temperature_80m", "temperature_120m", "temperature_180m", "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm", "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"],
-            "start_date": f"{(str(data_period_from))}",
-            "end_date": f"{str(self.date_to)}",
+            "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation", "rain", "showers", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "visibility", "cloud_cover_high", "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m", "wind_direction_10m", "wind_direction_80m", "wind_direction_120m", "wind_direction_180m", "wind_gusts_10m", "temperature_80m", "temperature_120m", "temperature_180m", "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm", "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"],
+            "start_date": self.date_from.strftime('%Y-%m-%d'),
+            "end_date": self.date_to.strftime('%Y-%m-%d')
         }
+        self.responses = self.openmeteo.weather_api(url, params=params)
         
-        print(params)
-
         # self.responses = self.openmeteo.weather_api(self.url, params=params)
         
-        # Process first location. Add a for-loop for multiple locations or weather models
-        # r = self.__get_data__()
+        daily_dataframe = self.__get_data__()
+        # daily_dataframe = pd.DataFrame(data = r)
         
-        # url = f'https://archive-api.open-meteo.com/v1/archive?latitude={latitude}&longitude={longitude}&start_date={(str(data_period).split( )[0])}&end_date={self.periods[0]}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,et0_fao_evapotranspiration,vapour_pressure_deficit,wind_speed_10m,wind_speed_100m,wind_direction_10m,wind_direction_100m,wind_gusts_10m,soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm,soil_temperature_100_to_255cm,soil_moisture_0_to_7cm,soil_moisture_7_to_28cm,soil_moisture_28_to_100cm,soil_moisture_100_to_255cm&daily='
-        # print(0)
-        # r = requests.get(url)
-        # r = r.json()
-        # df = pd.DataFrame.from_dict(pd.json_normalize(r), orient='columns')
-        # print(r)
-        # r.to_csv('adada.csv')
-        # else:
-            
-        #     # Make sure all required weather variables are listed here
-        #     # The order of variables in hourly or daily is important to assign them correctly below
-        #     params = {
-        #     	"latitude": self.latitude,
-        #     	"longitude": self.longitude,
-        #     	"hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation_probability", "precipitation", "rain", "showers", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "visibility", "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m", "wind_direction_10m", "wind_direction_80m", "wind_direction_120m", "wind_direction_180m", "wind_gusts_10m", "temperature_80m", "temperature_120m", "temperature_180m", "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm", "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"],
-        #     	"start_date": f"{(str(data_period).split( )[0])}",
-        #     	"end_date": f"{self.periods[0].strftime('%Y-%m-%d')}",
-        #     }
-        #     # return str(self.periods[0])
-        #     self.responses = self.openmeteo.weather_api(self.url, params=params)
+        daily_dataframe = daily_dataframe.sort_values('date')
+        daily_dataframe.drop_duplicates(inplace=True)
+        daily_dataframe = daily_dataframe.reset_index(drop=True)
+        
+        daily_dataframe['date'] = pd.to_datetime(daily_dataframe['date'])
+        daily_dataframe.set_index('date', inplace=True)
+        
+        days_map = {
+            0: 'ПН',
+            1: 'ВТ',
+            2: 'СР',
+            3: 'ЧТ',
+            4: 'ПТ',
+            5: 'СБ',
+            6: 'ВС'
+        }
+        
+        daily_dataframe['day_of_week'] = daily_dataframe.index.dayofweek.map(days_map)
+        
+        daily_dataframe = daily_dataframe[['temperature_2m', 'wind_speed_10m', 'pressure_msl', 'wind_direction_10m', 'relative_humidity_2m', 'weather_code', 'day_of_week']]
+        
+        print(daily_dataframe)
+        
+        result = {"days": {}}
 
-        #     # Process first location. Add a for-loop for multiple locations or weather models
-        #     r = self.__get_data__()
-            
-        #     # url = f'https://archive-api.open-meteo.com/v1/archive?latitude={latitude}&longitude={longitude}&past_days={math.ceil((datetime.datetime.now() - data_period).total_seconds()/(24 * 60 * 60))}&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation,rain,snowfall,snow_depth,weather_code,pressure_msl,surface_pressure,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,et0_fao_evapotranspiration,vapour_pressure_deficit,wind_speed_10m,wind_speed_100m,wind_direction_10m,wind_direction_100m,wind_gusts_10m,soil_temperature_0_to_7cm,soil_temperature_7_to_28cm,soil_temperature_28_to_100cm,soil_temperature_100_to_255cm,soil_moisture_0_to_7cm,soil_moisture_7_to_28cm,soil_moisture_28_to_100cm,soil_moisture_100_to_255cm&daily='
-        #     # print(url)
-        #     # r = requests.get(url)
-        #     # r = r.json()
-        #     # df = pd.DataFrame.from_dict(r, orient='columns')
-        #     r.to_csv('adada.csv')
-        #     # print(r)
-        # return str(r)
-        return 0
+        # Группируем по дням недели
+        ordered_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
+        
+        # Группируем по дням недели
+        for day in ordered_days:
+            if day in daily_dataframe['day_of_week'].values:
+                group = daily_dataframe[daily_dataframe['day_of_week'] == day]
+                result["days"][day] = group.apply(lambda x: {
+                    "datetime": x.name.isoformat(),
+                    "temperature": x['temperature_2m'],
+                    "humidity": x['relative_humidity_2m'],
+                    "wind_speed": x['wind_speed_10m'],
+                    "wind_direction": x['wind_direction_10m'],
+                    "WMO_code": x['weather_code'],
+                    "pressure": x['pressure_msl']
+                }, axis=1).tolist()
+
+        print(result)
+        
+        return result
     
     def __get_data__(self):
         """__get_data__ this is function for get data from url
@@ -215,7 +238,7 @@ class base():
         hourly_data["soil_moisture_100_to_255cm"] = hourly_soil_moisture_100_to_255cm                                                   # type: ignore
 
         hourly_dataframe = pd.DataFrame(data = hourly_data)
-        print(hourly_dataframe)
+        # print(hourly_dataframe)
 
         # Process daily data. The order of variables needs to be the same as requested.
         # daily = response.Daily()

@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, Query, Depends
 from models import base
 import uvicorn
+from tensorflow.keras.models import load_model
 import datetime
 
 from QueryParamsPredictions import QueryParams
@@ -10,6 +11,10 @@ tags_metadata = [
     {
         "name": "prediction",
         "description": "API for work with wheather **predictions**",
+    },
+    {
+        "name": "weather",
+        "description": "API for work with weather data",
     },
 ]
 
@@ -36,7 +41,9 @@ APP = FastAPI(
     swagger_ui_parameters={"syntaxHighlight": {"theme": "obsidian"}}
     )
 
-
+@APP.get('/', tags=["weather"])
+def hi():
+    return 'API for work with weather data'
 
 @APP.get('/api/prediction', tags=["prediction"])
 # async def prediction(city:str = 'Irkutsk', date_from:str | None = '2020-01-22', date_to:str | None = '2022-01-22', interval:str = 'DAYS', period:str | None = None):
@@ -56,7 +63,7 @@ async def prediction(params : QueryParams = Depends()):
         else:
             try:
                 date_from = datetime.datetime.strptime(params.date_from, '%Y-%m-%dT%H:%M%z')
-                date_to = datetime.datetime.strptime(params.date_to, '%Y-%m-%dT%H:%M%z')
+                date_to = datetime.datetime.strptime(params.date_to, 'Y-%%m-%dT%H:%M%z')
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -65,20 +72,30 @@ async def prediction(params : QueryParams = Depends()):
             print(params.date_from, params.date_to)
     else:
         if params.period:
-            now = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-            date_from = now - params.period
+            now = datetime.datetime.now(datetime.timezone.utc)
+            # print(params.period.to_timedelta())
+            date_from = now - params.period.to_timedelta() - datetime.timedelta(days=6)
+            print(date_from)
             date_to = now
+            
+            temp_from = date_to
+            temp_to = date_to + params.period.to_timedelta()
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f'You must provide date range',
             )
     try:
-        data = base(city = params.city, date_from = date_from, date_to=date_to, interval=params.interval).__give_prediction__()
+        data = base(city = params.city, date_from = temp_from, date_to=temp_to, interval=params.interval).__give_prediction__()
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     finally:
-        return {'data' : data}
+        return data
 
 if __name__ == "__main__":
+    # model_temp = load_model(r'\models\best_baselineV2_fix_temp.keras')
+    # model_pressure = load_model(r'\models\best_baselineV2_fix_pressure.keras')
+    # model_humidity = load_model(r'\models\best_baselineV2_fix_humidity.keras')
+    # model_wind = load_model(r'\models\best_baselineV2_fix_wind.keras')
+    # model_direction = load_model(r'\models\best_baselineV1_fix_direction.keras')
     uvicorn.run("routs:APP", host="192.168.0.133", port=5000, reload=True)
