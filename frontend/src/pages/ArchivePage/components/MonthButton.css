@@ -1,0 +1,13 @@
+.month-button-div {
+    /*background-color: #f3b6b6;*/
+    border: black solid 1px;
+    padding: 0.1rem 0.5rem 0.1rem 0.5rem;
+    border-radius: 10px;
+    margin-right: 0.3rem;
+    cursor: pointer;
+}
+
+.month-button-selected {
+    background-color: #000000;
+    color: white;
+}
