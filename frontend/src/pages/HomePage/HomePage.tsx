@@ -8,15 +8,17 @@ import HourStatus from "./components/HourStatus/HourStatus.tsx"
 import {WeatherTypes} from "../../common/constants/weatherTypes.ts";
 import clearBackground from "../../assets/weatherBackgrounds/clear-background.png"
 import DayForecast from "./components/DayForecast/DayForecast.tsx";
+import Timer from "./components/Timer.tsx";
 
 export default function HomePage() {
+
     return (
       <div className="page-container">
           <div className="inline-div upper-half">
               <div className="vert-div">
                   <div>
                       <p className="location-text">Иркутск, микрорайон Университетский</p>
-                      <p className="date-text">1 апреля, воскресенье, сейчас 14:88</p>
+                      <Timer/>
                   </div>
                   <div className="inline-div">
                       <p className="current-temp-text">+19°</p>

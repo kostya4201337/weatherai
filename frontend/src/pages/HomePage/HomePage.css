@@ -163,3 +163,21 @@ body {
     background: #eaeaea;
     border-radius: 0.5rem;
 }
+
+.seconds {
+    color: rgba(255, 255, 255, 0.47) !important;
+    /*font-size: 0.8rem !important;*/
+    /*line-height: 0.8rem !important;*/
+}
+
+.timer-div {
+    display: flex;
+    align-items: flex-end;
+    /*padding-top: 0.1rem;*/
+    /*padding-bottom: 0.1rem;*/
+}
+
+.time {
+    /*font-size: 1rem !important;*/
+    /*line-height: 1rem !important;*/
+}

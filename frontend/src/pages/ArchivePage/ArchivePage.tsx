@@ -13,7 +13,6 @@ export default function HomePage() {
 
     const handleClick = (month: string) => {
         setActiveButton(month);
-        console.log(month);
     }
 
     return (
