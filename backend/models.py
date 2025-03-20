@@ -12,54 +12,29 @@ import json
 
 class base():
     def __init__(self, city : str, date_from : datetime.datetime, date_to : datetime.datetime, interval : str):
-        self.url = "https://api.open-meteo.com/v1/forecast" #url for get data
+        self.url = "https://api.open-meteo.com/v1/forecast"
         
-        self.geolocator = Nominatim(user_agent="giv_long_latitude") # create geolocator
+        self.geolocator = Nominatim(user_agent="giv_long_latitude")
         
         # Setup the Open-Meteo API client with cache and retry on error
         cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
         retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
         self.openmeteo = openmeteo_requests.Client(session = retry_session)
         
-        # local varibles
         self.city = city
         self.interval = interval
         self.date_from = date_from
         self.date_to = date_to
-        
-        # geodata
+
         location = self.geolocator.geocode(self.city)
-        # check if location found
         if location:
             self.latitude = location.latitude
             self.longitude = location.longitude
             
-            #object timezone
             tf = TimezoneFinder()
-            # name of timezone
             timezone_name = tf.timezone_at(lng=self.longitude, lat=self.latitude)
             if timezone_name:
-                # object timezone
                 self.tz = pytz.timezone(timezone_name)
-
-                # now time
-                # current_time = datetime.datetime.now(tz)
-
-                # смещение
-                # utc_offset_timedelta = current_time.utcoffset()
-
-                # # Преобразуем смещение в часы
-                # total_seconds = utc_offset_timedelta.total_seconds()
-                # utc_offset_hours = total_seconds / 3600
-
-                # # Форматируем смещение для вывода (учитываем знак)
-                # if utc_offset_hours >= 0:
-                #     self.offset_int = utc_offset_hours
-                # else:
-                #     self.offset_int = -utc_offset_hours
-
-                # print(f"Часовой пояс: {timezone_name}")
-                # print(f"Смещение от UTC: {self.offset_int}")
             else:
                 return str("time is not available, check your city and country")
         else:
@@ -155,7 +130,6 @@ class base():
         
         print(grouped_remaining_hours)
         
-        # Функция для группировки по дням недели
         def group_by_day(dataframe):
             result = {"days": {}}
             ordered_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
