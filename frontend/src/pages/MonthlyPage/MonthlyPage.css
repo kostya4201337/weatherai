@@ -1,0 +1,39 @@
+.city-text {
+    font-family: RubikBold;
+    font-size: 2.8rem !important;
+    line-height: 2.8rem;
+    color: white;
+}
+
+.forecast-range-text {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.monthly-page {
+    filter: drop-shadow(-2px 3px 2px rgba(0, 0, 0, 0.1));
+}
+
+.monthly-title {
+    filter: drop-shadow(-2px 3px 2px rgba(0, 0, 0, 0.2));
+}
+
+.actual-monthly-page {
+    background-image: linear-gradient(to bottom, #007aa6 0, #3da2c6 5rem, #97cfe3 8rem, #ffffff 11rem, #ffffff 100%, #ffffff 200%);
+    background-size: 100% 200vh;
+    height: 100%;
+}
+
+.monthly-table-container {
+    margin-top: 5rem;
+}
+
+.monthly-date-text {
+    font-family: RubikRegular;
+    padding-bottom: 0.1rem;
+}
+
+table, tr {
+    border-bottom: 1px solid black;
+    border-collapse: collapse;
+}
