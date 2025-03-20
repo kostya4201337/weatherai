@@ -12,6 +12,7 @@ class PeriodEnum(Enum):
     HOUR = 'hour'
     DAY = 'day'
     WEEK = 'week'
+    WEEKP = 'weekp'
     MONTH = 'month'
 
     def to_timedelta(self):
@@ -19,6 +20,7 @@ class PeriodEnum(Enum):
             PeriodEnum.HOUR: datetime.timedelta(hours=1),
             PeriodEnum.DAY: datetime.timedelta(days=1),
             PeriodEnum.WEEK: datetime.timedelta(weeks=1),
+            PeriodEnum.WEEKP: datetime.timedelta(days=10),
             PeriodEnum.MONTH: datetime.timedelta(weeks=4)
         }[self]
 
@@ -38,8 +40,9 @@ class QueryParams(BaseModel):
         description="End date for weather predictions in format 'YYYY-MM-DDThh:mm±hh'",
         example="2025-01-22T20:07+08:00",
     ))
-    interval: IntervalEnum = Field(Query(
+    interval: IntervalEnum | None = Field(Query(
         description="Enum for interval parameters",
+        default=None,
         example=[
             IntervalEnum.HOURLY,
             IntervalEnum.DAILY

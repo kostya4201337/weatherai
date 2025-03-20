@@ -90,14 +90,14 @@ class base():
         
         current_time = pd.Timestamp.now(tz=self.tz)
 
-        daily_dataframe = daily_dataframe[daily_dataframe.index >= current_time]
+        daily_dataframe = daily_dataframe[daily_dataframe.index >= current_time - pd.Timedelta(hours=1)]
         
         daily_dataframe = daily_dataframe[['temperature_2m', 'wind_speed_10m', 'pressure_msl', 'wind_direction_10m', 'relative_humidity_2m', 'weather_code']]
         
         print(daily_dataframe)
         
-        first_6_hours = daily_dataframe[:6]
-        remaining_hours = daily_dataframe[6:]
+        first_6_hours = daily_dataframe[['temperature_2m', 'weather_code']][:13]
+        remaining_hours = daily_dataframe[1:]
         
         # remaining_hours.index = pd.to_datetime(remaining_hours.index)
         
@@ -110,6 +110,10 @@ class base():
             'weather_code': lambda x: x.mode()[0]
         })
         
+        grouped_remaining_hours['temperature_night_2m'] = grouped_remaining_hours['temperature_2m'].shift(1)
+        grouped_remaining_hours = grouped_remaining_hours[1:]
+        print(grouped_remaining_hours)
+        grouped_remaining_hours = grouped_remaining_hours[grouped_remaining_hours.index.hour != 12]
         # grouped_remaining_hours.set_index('index', inplace=True)
         
         days_map = {
@@ -128,8 +132,6 @@ class base():
         
         grouped_remaining_hours['day_of_week'] = grouped_remaining_hours.index.dayofweek.map(days_map)
         
-        print(grouped_remaining_hours)
-        
         def group_by_day(dataframe):
             result = {"days": {}}
             ordered_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
@@ -139,7 +141,8 @@ class base():
                     group = dataframe[dataframe['day_of_week'] == day]
                     result["days"][day] = group.apply(lambda x: {
                         "datetime": x.name.isoformat(),
-                        "temperature": x['temperature_2m'],
+                        "temperature_2m": x['temperature_2m'],
+                        "temperature_night_2m": x['temperature_night_2m'],
                         "humidity": x['relative_humidity_2m'],
                         "wind_speed": x['wind_speed_10m'],
                         "wind_direction": x['wind_direction_10m'],
@@ -149,7 +152,23 @@ class base():
 
             return result
         
-        first_6_hours = group_by_day(first_6_hours)
+        
+        def group_by_day_13(dataframe):
+            result = {"days": {}}
+            ordered_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
+
+            for day in ordered_days:
+                if day in dataframe['day_of_week'].values:
+                    group = dataframe[dataframe['day_of_week'] == day]
+                    result["days"][day] = group.apply(lambda x: {
+                        "datetime": x.name.isoformat(),
+                        "temperature": x['temperature_2m'],
+                        "weather_code": x['weather_code'],
+                    }, axis=1).tolist()
+
+            return result
+        
+        first_6_hours = group_by_day_13(first_6_hours)
         
         grouped_remaining_hours = group_by_day(grouped_remaining_hours)
         
