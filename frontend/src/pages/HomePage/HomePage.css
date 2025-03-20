@@ -49,6 +49,11 @@
     margin-left: 0.6rem !important;
 }
 
+body {
+    background-image: linear-gradient(to bottom, #006b93 0, #3da2c6 13rem, #97cfe3 22rem, #ffffff 28rem, #ffffff 100%, #ffffff 200%) !important;
+    background-size: 100% 200vh !important;
+}
+
 .wind-icon {
     max-width: 100%;
     height: 1.7rem;

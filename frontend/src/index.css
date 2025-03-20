@@ -26,8 +26,8 @@
 
   color-scheme: light dark;
   color: rgba(0, 0, 0, 0.87);
-  background-image: linear-gradient(to bottom, #006b93 0, #3da2c6 13rem, #97cfe3 22rem, #ffffff 28rem, #ffffff 100%, #ffffff 200%);
-  background-size: 100% 200vh;
+  /*background-image: linear-gradient(to bottom, #006b93 0, #3da2c6 13rem, #97cfe3 22rem, #ffffff 28rem, #ffffff 100%, #ffffff 200%);*/
+  /*background-size: 100% 200vh;*/
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

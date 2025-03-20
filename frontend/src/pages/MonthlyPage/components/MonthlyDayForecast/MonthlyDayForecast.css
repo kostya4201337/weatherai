@@ -1,0 +1,38 @@
+.monthly-day-weather-icon {
+    height: 3rem;
+    max-width: 80%;
+    object-fit: contain;
+    padding-right: 0.6rem;
+}
+
+.monthly-temp-day-text {
+    font-size: 1.6rem;
+    line-height: 1.7rem;
+}
+
+.monthly-temp-night-text {
+    color: #888888;
+    font-size: 0.9rem;
+    line-height: 0.9rem;
+}
+
+.monthly-weekend-day-text {
+    color: #cc0000;
+}
+
+.monthly-day-div {
+    margin: 0.9rem 1.2rem 0.7rem 0;
+}
+
+.monthly-day-cell {
+    max-width: 9rem;
+}
+
+/*.monthly-day-info-div {*/
+/*    width: auto;*/
+/*}*/
+
+/*.monthly-day-icon-wrap {*/
+/*    con*/
+/*    max-width: 1.6rem;*/
+/*}*/
