@@ -9,6 +9,7 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 import json
+from tensorflow.keras.models import load_model
 
 class base():
     def __init__(self, city : str, date_from : datetime.datetime, date_to : datetime.datetime, interval : str):
@@ -80,6 +81,8 @@ class base():
         
         daily_dataframe = self.__get_data__()
         # daily_dataframe = pd.DataFrame(data = r)
+        
+        daily_dataframe = self.pred(daily_dataframe)
         
         daily_dataframe = daily_dataframe.sort_values('date')
         daily_dataframe.drop_duplicates(inplace=True)
@@ -301,3 +304,26 @@ class base():
 
         # daily_dataframe = pd.DataFrame(data = daily_data)
         return hourly_dataframe
+    
+    def pred(self, data):
+        if data.empty:
+            model_temp = load_model(r'\models\best_baselineV2_fix_temp.keras')
+            model_pressure = load_model(r'\models\best_baselineV2_fix_pressure.keras')
+            model_humidity = load_model(r'\models\best_baselineV2_fix_humidity.keras')
+            model_wind = load_model(r'\models\best_baselineV2_fix_wind.keras')
+            model_direction = load_model(r'\models\best_baselineV1_fix_direction.keras')
+
+            model_temp.prediction(data['temp'])
+            model_pressure.prediction(data['pressure'])
+            model_humidity.prediction(data['humidity'])
+            model_wind.prediction(data['wind'])
+            model_direction.prediction(data['direction'])
+
+            return {
+                'temp_pred': model_temp.predict(data['temp']),
+                'pressure_pred': model_pressure.predict(data['pressure']),
+                'humidity_pred': model_humidity.predict(data['humidity']),
+                'wind_pred': model_wind.predict(data['wind']),
+                'direction_pred': model_direction.predict(data['direction'])
+                }
+        return data

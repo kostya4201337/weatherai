@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Query, Depends
 from models import base
 import uvicorn
-from tensorflow.keras.models import load_model
 import datetime
 
 from QueryParamsPredictions import QueryParams
@@ -93,9 +92,4 @@ async def prediction(params : QueryParams = Depends()):
         return data
 
 if __name__ == "__main__":
-    # model_temp = load_model(r'\models\best_baselineV2_fix_temp.keras')
-    # model_pressure = load_model(r'\models\best_baselineV2_fix_pressure.keras')
-    # model_humidity = load_model(r'\models\best_baselineV2_fix_humidity.keras')
-    # model_wind = load_model(r'\models\best_baselineV2_fix_wind.keras')
-    # model_direction = load_model(r'\models\best_baselineV1_fix_direction.keras')
     uvicorn.run("routs:APP", host="192.168.0.133", port=5000, reload=True)
