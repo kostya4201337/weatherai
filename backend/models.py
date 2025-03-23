@@ -11,17 +11,24 @@ from retry_requests import retry
 import json
 from tensorflow.keras.models import load_model
 
-class base():
-    def __init__(self, city : str, date_from : datetime.datetime, date_to : datetime.datetime, interval : str):
+
+class base:
+    def __init__(
+        self,
+        city: str,
+        date_from: datetime.datetime,
+        date_to: datetime.datetime,
+        interval: str,
+    ):
         self.url = "https://api.open-meteo.com/v1/forecast"
-        
+
         self.geolocator = Nominatim(user_agent="giv_long_latitude")
-        
+
         # Setup the Open-Meteo API client with cache and retry on error
-        cache_session = requests_cache.CachedSession('.cache', expire_after = 3600)
-        retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
-        self.openmeteo = openmeteo_requests.Client(session = retry_session)
-        
+        cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
+        retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
+        self.openmeteo = openmeteo_requests.Client(session=retry_session)
+
         self.city = city
         self.interval = interval
         self.date_from = date_from
@@ -31,7 +38,7 @@ class base():
         if location:
             self.latitude = location.latitude
             self.longitude = location.longitude
-            
+
             tf = TimezoneFinder()
             timezone_name = tf.timezone_at(lng=self.longitude, lat=self.latitude)
             if timezone_name:
@@ -40,10 +47,10 @@ class base():
                 return str("time is not available, check your city and country")
         else:
             return str("Местоположение не найдено")
-        
+
         print(date_from, date_to)
-        
-    def __give_prediction__ (self):
+
+    def __give_prediction__(self):
         # data_period_from = self.date_from-datetime.timedelta(days = 3)
         # data_period_to = self.date_from-datetime.timedelta(days = 3)
         # time_difference = self.date_to-self.date_from
@@ -51,10 +58,9 @@ class base():
         #     return str('not correct data period')
         # total_seconds = time_difference.total_seconds()
         # print(total_days = total_seconds // (24 * 3600))
-        
-        
+
         # if self.periods[0] > datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)-datetime.timedelta(hours=-self.offset_int):
-        
+
         # Make sure all required weather variables are listed here
         # The order of variables in hourly or daily is important to assign them correctly below
         # params = {
@@ -64,121 +70,234 @@ class base():
         #     # "start_date": f"{(str(data_period_from))}",
         #     "end_date": f"{str(self.date_to)}",
         # }
-        
+
         # print(params)
-        
+
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "hourly": ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "apparent_temperature", "precipitation", "rain", "showers", "snowfall", "snow_depth", "weather_code", "pressure_msl", "surface_pressure", "cloud_cover", "cloud_cover_low", "cloud_cover_mid", "visibility", "cloud_cover_high", "evapotranspiration", "et0_fao_evapotranspiration", "vapour_pressure_deficit", "wind_speed_10m", "wind_speed_80m", "wind_speed_120m", "wind_speed_180m", "wind_direction_10m", "wind_direction_80m", "wind_direction_120m", "wind_direction_180m", "wind_gusts_10m", "temperature_80m", "temperature_120m", "temperature_180m", "soil_temperature_0cm", "soil_temperature_6cm", "soil_temperature_18cm", "soil_temperature_54cm", "soil_moisture_0_to_1cm", "soil_moisture_1_to_3cm", "soil_moisture_3_to_9cm", "soil_moisture_9_to_27cm", "soil_moisture_27_to_81cm"],
-            "start_date": self.date_from.strftime('%Y-%m-%d'),
-            "end_date": self.date_to.strftime('%Y-%m-%d')
+            "hourly": [
+                "temperature_2m",
+                "relative_humidity_2m",
+                "dew_point_2m",
+                "apparent_temperature",
+                "precipitation",
+                "rain",
+                "showers",
+                "snowfall",
+                "snow_depth",
+                "weather_code",
+                "pressure_msl",
+                "surface_pressure",
+                "cloud_cover",
+                "cloud_cover_low",
+                "cloud_cover_mid",
+                "visibility",
+                "cloud_cover_high",
+                "evapotranspiration",
+                "et0_fao_evapotranspiration",
+                "vapour_pressure_deficit",
+                "wind_speed_10m",
+                "wind_speed_80m",
+                "wind_speed_120m",
+                "wind_speed_180m",
+                "wind_direction_10m",
+                "wind_direction_80m",
+                "wind_direction_120m",
+                "wind_direction_180m",
+                "wind_gusts_10m",
+                "temperature_80m",
+                "temperature_120m",
+                "temperature_180m",
+                "soil_temperature_0cm",
+                "soil_temperature_6cm",
+                "soil_temperature_18cm",
+                "soil_temperature_54cm",
+                "soil_moisture_0_to_1cm",
+                "soil_moisture_1_to_3cm",
+                "soil_moisture_3_to_9cm",
+                "soil_moisture_9_to_27cm",
+                "soil_moisture_27_to_81cm",
+            ],
+            "start_date": self.date_from.strftime("%Y-%m-%d"),
+            "end_date": self.date_to.strftime("%Y-%m-%d"),
         }
         self.responses = self.openmeteo.weather_api(url, params=params)
-        
+
         # self.responses = self.openmeteo.weather_api(self.url, params=params)
-        
+
         daily_dataframe = self.__get_data__()
         # daily_dataframe = pd.DataFrame(data = r)
-        
+
         daily_dataframe = self.pred(daily_dataframe)
-        
-        daily_dataframe = daily_dataframe.sort_values('date')
+
+        daily_dataframe = daily_dataframe.sort_values("date")
         daily_dataframe.drop_duplicates(inplace=True)
         daily_dataframe = daily_dataframe.reset_index(drop=True)
-        
-        daily_dataframe['date'] = pd.to_datetime(daily_dataframe['date'])
-        daily_dataframe.set_index('date', inplace=True)
-        
+
+        daily_dataframe["date"] = pd.to_datetime(daily_dataframe["date"])
+        daily_dataframe.set_index("date", inplace=True)
+
         current_time = pd.Timestamp.now(tz=self.tz)
 
-        daily_dataframe = daily_dataframe[daily_dataframe.index >= current_time - pd.Timedelta(hours=1)]
-        
-        daily_dataframe = daily_dataframe[['temperature_2m', 'wind_speed_10m', 'pressure_msl', 'wind_direction_10m', 'relative_humidity_2m', 'weather_code']]
-        
+        daily_dataframe = daily_dataframe[
+            daily_dataframe.index >= current_time - pd.Timedelta(hours=1)
+        ]
+
+        daily_dataframe = daily_dataframe[
+            [
+                "temperature_2m",
+                "wind_speed_10m",
+                "pressure_msl",
+                "wind_direction_10m",
+                "relative_humidity_2m",
+                "weather_code",
+            ]
+        ]
+
         print(daily_dataframe)
-        
-        first_6_hours = daily_dataframe[['temperature_2m', 'weather_code']][:13]
+
+        today_hours = daily_dataframe[:24]
+        first_6_hours = daily_dataframe[["temperature_2m", "weather_code"]][:13]
         remaining_hours = daily_dataframe[1:]
-        
+
         # remaining_hours.index = pd.to_datetime(remaining_hours.index)
-        
-        grouped_remaining_hours = remaining_hours.groupby(pd.Grouper(freq='12h')).agg({
-            'temperature_2m': 'mean',
-            'relative_humidity_2m': 'mean',
-            'wind_speed_10m': 'mean',
-            'wind_direction_10m': 'mean',
-            'pressure_msl': 'mean',
-            'weather_code': lambda x: x.mode()[0]
-        })
-        
-        grouped_remaining_hours['temperature_night_2m'] = grouped_remaining_hours['temperature_2m'].shift(1)
+
+        grouped_remaining_hours = remaining_hours.groupby(pd.Grouper(freq="12h")).agg(
+            {
+                "temperature_2m": "mean",
+                "relative_humidity_2m": "mean",
+                "wind_speed_10m": "mean",
+                "wind_direction_10m": "mean",
+                "pressure_msl": "mean",
+                "weather_code": lambda x: x.mode()[0],
+            }
+        )
+
+        today_hours["temperature_night_2m"] = today_hours["temperature_2m"].shift(1)
+
+        grouped_today_hours = today_hours.groupby(pd.Grouper(freq="24h")).agg(
+            {
+                "temperature_2m": "mean",
+                "temperature_night_2m": "mean",
+                "relative_humidity_2m": "mean",
+                "wind_speed_10m": "mean",
+                "wind_direction_10m": "mean",
+                "pressure_msl": "mean",
+                "weather_code": lambda x: x.mode()[0],
+            }
+        )
+
+        grouped_today_hours = grouped_today_hours[1:]
+
+        # print(grouped_today_hours)
+
+        grouped_remaining_hours["temperature_night_2m"] = grouped_remaining_hours[
+            "temperature_2m"
+        ].shift(1)
         grouped_remaining_hours = grouped_remaining_hours[1:]
-        print(grouped_remaining_hours)
-        grouped_remaining_hours = grouped_remaining_hours[grouped_remaining_hours.index.hour != 12]
+        # print(grouped_remaining_hours)
+        grouped_remaining_hours = grouped_remaining_hours[
+            grouped_remaining_hours.index.hour != 12
+        ]
         # grouped_remaining_hours.set_index('index', inplace=True)
+
+        days_map = {0: "ПН", 1: "ВТ", 2: "СР", 3: "ЧТ", 4: "ПТ", 5: "СБ", 6: "ВС"}
+
+        first_6_hours["day_of_week"] = first_6_hours.index.dayofweek.map(days_map)
         
-        days_map = {
-            0: 'ПН',
-            1: 'ВТ',
-            2: 'СР',
-            3: 'ЧТ',
-            4: 'ПТ',
-            5: 'СБ',
-            6: 'ВС'
-        }
-        
-        first_6_hours['day_of_week'] = first_6_hours.index.dayofweek.map(days_map)
-        
+        grouped_today_hours["day_of_week"] = grouped_today_hours.index.dayofweek.map(days_map)
+
         grouped_remaining_hours.index = pd.to_datetime(grouped_remaining_hours.index)
-        
-        grouped_remaining_hours['day_of_week'] = grouped_remaining_hours.index.dayofweek.map(days_map)
-        
+
+        grouped_remaining_hours["day_of_week"] = (
+            grouped_remaining_hours.index.dayofweek.map(days_map)
+        )
+
         def group_by_day(dataframe):
-            result = {"days": {}}
-            ordered_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
+            result = []
+            ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
             for day in ordered_days:
-                if day in dataframe['day_of_week'].values:
-                    group = dataframe[dataframe['day_of_week'] == day]
-                    result["days"][day] = group.apply(lambda x: {
-                        "datetime": x.name.isoformat(),
-                        "temperature_2m": x['temperature_2m'],
-                        "temperature_night_2m": x['temperature_night_2m'],
-                        "humidity": x['relative_humidity_2m'],
-                        "wind_speed": x['wind_speed_10m'],
-                        "wind_direction": x['wind_direction_10m'],
-                        "WMO_code": x['weather_code'],
-                        "pressure": x['pressure_msl']
-                    }, axis=1).tolist()
+                if day in dataframe["day_of_week"].values:
+                    group = dataframe[dataframe["day_of_week"] == day]
+                    day_data = group.apply(
+                        lambda x: {
+                            "datetime": x.name.isoformat(),
+                            "temperature_2m": x["temperature_2m"],
+                            "temperature_night_2m": x["temperature_night_2m"],
+                            "humidity": x["relative_humidity_2m"],
+                            "wind_speed": x["wind_speed_10m"],
+                            "wind_direction": x["wind_direction_10m"],
+                            "WMO_code": x["weather_code"],
+                            "pressure": x["pressure_msl"],
+                            "day_of_week": day 
+                        },
+                        axis=1,
+                    ).tolist()
+                    result.extend(day_data) 
+
+            return result
+        
+        def group_by_day_today(dataframe):
+            nonlocal current_time
+            result = []
+            ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
+
+            for day in ordered_days:
+                if day in dataframe["day_of_week"].values:
+                    group = dataframe[dataframe["day_of_week"] == day]
+                    day_data = group.apply(
+                        lambda x: {
+                            "datetime": current_time.isoformat(),
+                            "temperature_2m": x["temperature_2m"],
+                            "temperature_night_2m": x["temperature_night_2m"],
+                            "humidity": x["relative_humidity_2m"],
+                            "wind_speed": x["wind_speed_10m"],
+                            "wind_direction": x["wind_direction_10m"],
+                            "WMO_code": x["weather_code"],
+                            "pressure": x["pressure_msl"],
+                            "day_of_week": day 
+                        },
+                        axis=1,
+                    ).tolist()
+                    result.extend(day_data) 
 
             return result
         
         
         def group_by_day_13(dataframe):
-            result = {"days": {}}
-            ordered_days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']
+            result = []
+            ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
             for day in ordered_days:
-                if day in dataframe['day_of_week'].values:
-                    group = dataframe[dataframe['day_of_week'] == day]
-                    result["days"][day] = group.apply(lambda x: {
-                        "datetime": x.name.isoformat(),
-                        "temperature": x['temperature_2m'],
-                        "weather_code": x['weather_code'],
-                    }, axis=1).tolist()
-
+                if day in dataframe["day_of_week"].values:
+                    group = dataframe[dataframe["day_of_week"] == day]
+                    day_data = group.apply(
+                        lambda x: {
+                            "datetime": x.name.isoformat(),
+                            "temperature": x["temperature_2m"],
+                            "weather_code": x["weather_code"],
+                            "day_of_week": day,
+                        },
+                        axis=1,
+                    ).tolist()
+                    result.extend(day_data)
             return result
-        
+
         first_6_hours = group_by_day_13(first_6_hours)
-        
+
         grouped_remaining_hours = group_by_day(grouped_remaining_hours)
         
-        result = {'hourly':first_6_hours, 'daily':grouped_remaining_hours}
+        grouped_today_hours = group_by_day_today(grouped_today_hours)
         
+        print(grouped_today_hours)
+
+        result = {"today": grouped_today_hours,"hourly": first_6_hours, "daily": grouped_remaining_hours}
+
         return result
-    
+
     def __get_data__(self):
         """__get_data__ this is function for get data from url
 
@@ -237,14 +356,16 @@ class base():
         hourly_soil_moisture_3_to_9cm = hourly.Variables(38).ValuesAsNumpy()
         hourly_soil_moisture_27_to_81cm = hourly.Variables(39).ValuesAsNumpy()
         hourly_soil_moisture_9_to_27cm = hourly.Variables(40).ValuesAsNumpy()
-        
-        hourly_data = {"date": pd.date_range(
-            start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
-            end = pd.to_datetime(hourly.TimeEnd(), unit = "s", utc = True),
-            freq = pd.Timedelta(seconds = hourly.Interval()),
-            inclusive = "left"
-        )}
-        
+
+        hourly_data = {
+            "date": pd.date_range(
+                start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
+                end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
+                freq=pd.Timedelta(seconds=hourly.Interval()),
+                inclusive="left",
+            )
+        }
+
         hourly_data["temperature_2m"] = hourly_temperature_2m
         hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
         hourly_data["dew_point_2m"] = hourly_dew_point_2m
@@ -287,7 +408,7 @@ class base():
         hourly_data["soil_moisture_27_to_81cm"] = hourly_soil_moisture_27_to_81cm
         hourly_data["soil_moisture_9_to_27cm"] = hourly_soil_moisture_9_to_27cm
 
-        hourly_dataframe = pd.DataFrame(data = hourly_data)
+        hourly_dataframe = pd.DataFrame(data=hourly_data)
         # print(hourly_dataframe)
 
         # Process daily data. The order of variables needs to be the same as requested.
@@ -304,26 +425,26 @@ class base():
 
         # daily_dataframe = pd.DataFrame(data = daily_data)
         return hourly_dataframe
-    
+
     def pred(self, data):
         if data.empty:
-            model_temp = load_model(r'\models\best_baselineV2_fix_temp.keras')
-            model_pressure = load_model(r'\models\best_baselineV2_fix_pressure.keras')
-            model_humidity = load_model(r'\models\best_baselineV2_fix_humidity.keras')
-            model_wind = load_model(r'\models\best_baselineV2_fix_wind.keras')
-            model_direction = load_model(r'\models\best_baselineV1_fix_direction.keras')
+            model_temp = load_model(r"\models\best_baselineV2_fix_temp.keras")
+            model_pressure = load_model(r"\models\best_baselineV2_fix_pressure.keras")
+            model_humidity = load_model(r"\models\best_baselineV2_fix_humidity.keras")
+            model_wind = load_model(r"\models\best_baselineV2_fix_wind.keras")
+            model_direction = load_model(r"\models\best_baselineV1_fix_direction.keras")
 
-            model_temp.prediction(data['temp'])
-            model_pressure.prediction(data['pressure'])
-            model_humidity.prediction(data['humidity'])
-            model_wind.prediction(data['wind'])
-            model_direction.prediction(data['direction'])
+            model_temp.prediction(data["temp"])
+            model_pressure.prediction(data["pressure"])
+            model_humidity.prediction(data["humidity"])
+            model_wind.prediction(data["wind"])
+            model_direction.prediction(data["direction"])
 
             return {
-                'temp_pred': model_temp.predict(data['temp']),
-                'pressure_pred': model_pressure.predict(data['pressure']),
-                'humidity_pred': model_humidity.predict(data['humidity']),
-                'wind_pred': model_wind.predict(data['wind']),
-                'direction_pred': model_direction.predict(data['direction'])
-                }
+                "temp_pred": model_temp.predict(data["temp"]),
+                "pressure_pred": model_pressure.predict(data["pressure"]),
+                "humidity_pred": model_humidity.predict(data["humidity"]),
+                "wind_pred": model_wind.predict(data["wind"]),
+                "direction_pred": model_direction.predict(data["direction"]),
+            }
         return data
