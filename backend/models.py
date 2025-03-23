@@ -110,7 +110,7 @@ class base:
         daily_dataframe.set_index("date", inplace=True)
 
         grouped_daily_dataframe = daily_dataframe.groupby(
-            pd.Grouper(freq="12h")
+            pd.Grouper(freq="24h")
         ).agg(
             {
                 "temperature_2m": "mean",
