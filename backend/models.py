@@ -206,8 +206,10 @@ class base:
         days_map = {0: "ПН", 1: "ВТ", 2: "СР", 3: "ЧТ", 4: "ПТ", 5: "СБ", 6: "ВС"}
 
         first_6_hours["day_of_week"] = first_6_hours.index.dayofweek.map(days_map)
-        
-        grouped_today_hours["day_of_week"] = grouped_today_hours.index.dayofweek.map(days_map)
+
+        grouped_today_hours["day_of_week"] = grouped_today_hours.index.dayofweek.map(
+            days_map
+        )
 
         grouped_remaining_hours.index = pd.to_datetime(grouped_remaining_hours.index)
 
@@ -217,84 +219,87 @@ class base:
 
         def group_by_day(dataframe):
             result = []
-            ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
+            # ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
-            for day in ordered_days:
-                if day in dataframe["day_of_week"].values:
-                    group = dataframe[dataframe["day_of_week"] == day]
-                    day_data = group.apply(
-                        lambda x: {
-                            "datetime": x.name.isoformat(),
-                            "temperature_2m": x["temperature_2m"],
-                            "temperature_night_2m": x["temperature_night_2m"],
-                            "humidity": x["relative_humidity_2m"],
-                            "wind_speed": x["wind_speed_10m"],
-                            "wind_direction": x["wind_direction_10m"],
-                            "WMO_code": x["weather_code"],
-                            "pressure": x["pressure_msl"],
-                            "day_of_week": day 
-                        },
-                        axis=1,
-                    ).tolist()
-                    result.extend(day_data) 
+            dataframe["datetime"] = pd.to_datetime(dataframe.index)
+
+            sorted_dataframe = dataframe.sort_values(by="datetime")
+
+            day_data = sorted_dataframe.apply(
+                lambda x: {
+                    "datetime": x.name.isoformat(),
+                    "temperature_2m": x["temperature_2m"],
+                    "temperature_night_2m": x["temperature_night_2m"],
+                    "humidity": x["relative_humidity_2m"],
+                    "wind_speed": x["wind_speed_10m"],
+                    "wind_direction": x["wind_direction_10m"],
+                    "WMO_code": x["weather_code"],
+                    "pressure": x["pressure_msl"],
+                    "day_of_week": x["day_of_week"],
+                },
+                axis=1,
+            ).tolist()
+            result.extend(day_data)
 
             return result
-        
-        def group_by_day_today(dataframe):
+
+        def group_by_time_today(dataframe):
             nonlocal current_time
             result = []
-            ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
+            # Применяем функцию для создания списка словарей
+            day_data = dataframe.apply(
+                lambda x: {
+                    "datetime": current_time.isoformat(),
+                    "temperature_2m": float(x["temperature_2m"]),
+                    "temperature_night_2m": float(x["temperature_night_2m"]),
+                    "humidity": float(x["relative_humidity_2m"]),
+                    "wind_speed": float(x["wind_speed_10m"]),
+                    "wind_direction": float(x["wind_direction_10m"]),
+                    "WMO_code": int(x["weather_code"]),
+                    "pressure": float(x["pressure_msl"]),
+                    "day_of_week": x["day_of_week"],
+                },
+                axis=1,
+            ).tolist()
 
-            for day in ordered_days:
-                if day in dataframe["day_of_week"].values:
-                    group = dataframe[dataframe["day_of_week"] == day]
-                    day_data = group.apply(
-                        lambda x: {
-                            "datetime": current_time.isoformat(),
-                            "temperature_2m": x["temperature_2m"],
-                            "temperature_night_2m": x["temperature_night_2m"],
-                            "humidity": x["relative_humidity_2m"],
-                            "wind_speed": x["wind_speed_10m"],
-                            "wind_direction": x["wind_direction_10m"],
-                            "WMO_code": x["weather_code"],
-                            "pressure": x["pressure_msl"],
-                            "day_of_week": day 
-                        },
-                        axis=1,
-                    ).tolist()
-                    result.extend(day_data) 
+            result.extend(day_data)
 
             return result
-        
-        
+
         def group_by_day_13(dataframe):
             result = []
-            ordered_days = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"]
 
-            for day in ordered_days:
-                if day in dataframe["day_of_week"].values:
-                    group = dataframe[dataframe["day_of_week"] == day]
-                    day_data = group.apply(
-                        lambda x: {
-                            "datetime": x.name.isoformat(),
-                            "temperature": x["temperature_2m"],
-                            "weather_code": x["weather_code"],
-                            "day_of_week": day,
-                        },
-                        axis=1,
-                    ).tolist()
-                    result.extend(day_data)
+            dataframe["datetime"] = pd.to_datetime(dataframe.index)
+
+            sorted_dataframe = dataframe.sort_values(by="datetime")
+
+            day_data = sorted_dataframe.apply(
+                lambda x: {
+                    "datetime": x["datetime"].isoformat(),
+                    "temperature": float(x["temperature_2m"]),
+                    "weather_code": int(x["weather_code"]),
+                    "day_of_week": x["day_of_week"],
+                },
+                axis=1,
+            ).tolist()
+
+            result.extend(day_data)
+
             return result
 
         first_6_hours = group_by_day_13(first_6_hours)
 
         grouped_remaining_hours = group_by_day(grouped_remaining_hours)
-        
-        grouped_today_hours = group_by_day_today(grouped_today_hours)
-        
+
+        grouped_today_hours = group_by_time_today(grouped_today_hours)
+
         print(grouped_today_hours)
 
-        result = {"today": grouped_today_hours,"hourly": first_6_hours, "daily": grouped_remaining_hours}
+        result = {
+            "today": grouped_today_hours,
+            "hourly": first_6_hours,
+            "daily": grouped_remaining_hours,
+        }
 
         return result
 
