@@ -4,7 +4,7 @@ import MonthlyDayForecast from "./components/MonthlyDayForecast/MonthlyDayForeca
 import {WeatherTypes} from "../../common/constants/weatherTypes.ts";
 
 
-export default function HomePage() {
+export default function MonthlyPage() {
 
     var date = new Date();
 

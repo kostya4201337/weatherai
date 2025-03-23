@@ -14,7 +14,7 @@ const HourStatus: React.FC<HourStatusProps> = ({hour, temp, type}) => {
     let src;
     switch (type) {
         case WeatherTypes.CLEAR:
-            src = CloudyIcon;
+            src = ClearIcon;
             break;
         case WeatherTypes.CLOUDY:
             src = CloudyIcon;

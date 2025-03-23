@@ -14,7 +14,7 @@ const MonthlyDayForecast: React.FC<MonthlyDayForecastProps> = ({weekDay, day, ty
     let src;
     switch (type) {
         case WeatherTypes.CLEAR:
-            src = CloudyOutlineIcon;
+            src = ClearOutlineIcon;
             break;
         case WeatherTypes.CLOUDY:
             src = CloudyOutlineIcon;

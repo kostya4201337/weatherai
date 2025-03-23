@@ -5,7 +5,7 @@ import "./ArchivePage.css"
 import {useState} from "react";
 
 
-export default function HomePage() {
+export default function ArchivePage() {
 
     const [activeButton, setActiveButton] = useState<string>("Март");
 

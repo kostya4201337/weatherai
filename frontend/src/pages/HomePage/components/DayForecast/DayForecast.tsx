@@ -18,7 +18,7 @@ const DayForecast: React.FC<DayForecastProps> = ({weekDay, day, month, tempDay, 
     let typeName;
     switch (type) {
         case WeatherTypes.CLEAR:
-            src = CloudyOutlineIcon;
+            src = ClearOutlineIcon;
             typeName = "Ясно";
             break;
         case WeatherTypes.CLOUDY:
