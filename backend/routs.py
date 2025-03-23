@@ -62,34 +62,47 @@ async def prediction(params : QueryParams = Depends()):
         else:
             try:
                 date_from = datetime.datetime.strptime(params.date_from, '%Y-%m-%dT%H:%M%z')
-                date_to = datetime.datetime.strptime(params.date_to, 'Y-%%m-%dT%H:%M%z')
+                date_to = datetime.datetime.strptime(params.date_to, '%Y-%m-%dT%H:%M%z')
+                try:
+                    data = base(city = params.city, date_from = date_from, date_to=date_to, interval=params.interval).__give_archive__()
+                    print(data)
+                except:
+                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Invalid date format. Use 'YYYY-MM-DDThh:mm±hh'",
                 )
             print(params.date_from, params.date_to)
+            print(date_from, date_to)
     else:
         if params.period:
             now = datetime.datetime.now(datetime.timezone.utc)
             # print(params.period.to_timedelta())
-            date_from = now - params.period.to_timedelta() - datetime.timedelta(days=6)
-            print(date_from)
-            date_to = now
+            # date_from = now - params.period.to_timedelta() - datetime.timedelta(days=6)
+            # print(date_from)
+            # date_to = now
             
-            temp_from = date_to
-            temp_to = date_to + params.period.to_timedelta()
+            date_from = now
+            date_to = date_to + params.period.to_timedelta()
+            print(date_from)
+            try:
+                data = base(city = params.city, date_from = date_from, date_to=date_to, interval=params.interval).__give_prediction__()
+            except Exception as e:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f'You must provide date range',
             )
-    try:
-        data = base(city = params.city, date_from = temp_from, date_to=temp_to, interval=params.interval).__give_prediction__()
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-    finally:
+    if data:
+        print(data)
         return data
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'No data found for city {params.city} in given period',
+        )
 
 if __name__ == "__main__":
     uvicorn.run("routs:APP", host="192.168.0.133", port=5000, reload=True)

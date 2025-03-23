@@ -50,6 +50,124 @@ class base:
 
         print(date_from, date_to)
 
+    def __give_archive__(self):
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "hourly": [
+                "temperature_2m",
+                "relative_humidity_2m",
+                "dew_point_2m",
+                "apparent_temperature",
+                "precipitation",
+                "rain",
+                "showers",
+                "snowfall",
+                "snow_depth",
+                "weather_code",
+                "pressure_msl",
+                "surface_pressure",
+                "cloud_cover",
+                "cloud_cover_low",
+                "cloud_cover_mid",
+                "visibility",
+                "cloud_cover_high",
+                "evapotranspiration",
+                "et0_fao_evapotranspiration",
+                "vapour_pressure_deficit",
+                "wind_speed_10m",
+                "wind_speed_80m",
+                "wind_speed_120m",
+                "wind_speed_180m",
+                "wind_direction_10m",
+                "wind_direction_80m",
+                "wind_direction_120m",
+                "wind_direction_180m",
+                "wind_gusts_10m",
+                "temperature_80m",
+                "temperature_120m",
+                "temperature_180m",
+                "soil_temperature_0cm",
+                "soil_temperature_6cm",
+                "soil_temperature_18cm",
+                "soil_temperature_54cm",
+                "soil_moisture_0_to_1cm",
+                "soil_moisture_1_to_3cm",
+                "soil_moisture_3_to_9cm",
+                "soil_moisture_9_to_27cm",
+                "soil_moisture_27_to_81cm",
+            ],
+            "start_date": self.date_from.strftime("%Y-%m-%d"),
+            "end_date": self.date_to.strftime("%Y-%m-%d"),
+        }
+
+        self.responses = self.openmeteo.weather_api(url, params=params)
+
+        daily_dataframe = self.__get_data__()
+        
+        daily_dataframe["date"] = pd.to_datetime(daily_dataframe["date"]).dt.tz_convert(self.tz)
+        daily_dataframe.set_index("date", inplace=True)
+
+        grouped_daily_dataframe = daily_dataframe.groupby(
+            pd.Grouper(freq="12h")
+        ).agg(
+            {
+                "temperature_2m": "mean",
+                "relative_humidity_2m": "mean",
+                "wind_speed_10m": "mean",
+                "wind_direction_10m": "mean",
+                "pressure_msl": "mean",
+                "weather_code": lambda x: x.mode()[0],
+            }
+        )
+        
+        date_from_pd = pd.Timestamp(self.date_from)
+        
+        date_to_pd = pd.Timestamp(self.date_to)
+
+        grouped_daily_dataframe["temperature_night_2m"] = grouped_daily_dataframe[
+            "temperature_2m"
+        ].shift(1)
+        
+        mask = (grouped_daily_dataframe.index >= (date_from_pd - pd.Timedelta(hours=1))) & (grouped_daily_dataframe.index <= date_to_pd)
+        grouped_daily_dataframe = grouped_daily_dataframe.loc[mask]
+        
+        grouped_daily_dataframe[1:]
+        
+        days_map = {0: "ПН", 1: "ВТ", 2: "СР", 3: "ЧТ", 4: "ПТ", 5: "СБ", 6: "ВС"}
+        
+        grouped_daily_dataframe.index = pd.to_datetime(grouped_daily_dataframe.index)
+
+        grouped_daily_dataframe["day_of_week"] = grouped_daily_dataframe.index.dayofweek.map(days_map)
+
+        
+        def group_by_time_today(dataframe):
+            result = []
+            # Применяем функцию для создания списка словарей
+            day_data = dataframe.apply(
+                lambda x: {
+                    "datetime": x.name.isoformat(),
+                    "temperature_2m": float(x["temperature_2m"]),
+                    "temperature_night_2m": float(x["temperature_night_2m"]),
+                    "humidity": float(x["relative_humidity_2m"]),
+                    "wind_speed": float(x["wind_speed_10m"]),
+                    "wind_direction": float(x["wind_direction_10m"]),
+                    "WMO_code": int(x["weather_code"]),
+                    "pressure": float(x["pressure_msl"]),
+                    "day_of_week": x["day_of_week"],
+                },
+                axis=1,
+            ).tolist()
+            result.extend(day_data)
+
+            return result
+        
+                
+        grouped_daily_dataframe = group_by_time_today(grouped_daily_dataframe)
+
+        return {"archive":grouped_daily_dataframe}
+
     def __give_prediction__(self):
         # data_period_from = self.date_from-datetime.timedelta(days = 3)
         # data_period_to = self.date_from-datetime.timedelta(days = 3)
@@ -181,9 +299,11 @@ class base:
                 "weather_code": lambda x: x.mode()[0],
             }
         )
-        
-        grouped_today_hours["temperature_night_2m"] = grouped_today_hours["temperature_2m"].shift(1)
-        
+
+        grouped_today_hours["temperature_night_2m"] = grouped_today_hours[
+            "temperature_2m"
+        ].shift(1)
+
         grouped_today_hours = grouped_today_hours[1:]
 
         print(grouped_today_hours)
@@ -191,7 +311,7 @@ class base:
         grouped_remaining_hours["temperature_night_2m"] = grouped_remaining_hours[
             "temperature_2m"
         ].shift(1)
-        
+
         grouped_remaining_hours = grouped_remaining_hours[1:]
         # print(grouped_remaining_hours)
         grouped_remaining_hours = grouped_remaining_hours[
