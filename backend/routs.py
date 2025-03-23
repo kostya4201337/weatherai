@@ -84,7 +84,7 @@ async def prediction(params : QueryParams = Depends()):
             # date_to = now
             
             date_from = now
-            date_to = date_to + params.period.to_timedelta()
+            date_to = now + params.period.to_timedelta()
             print(date_from)
             try:
                 data = base(city = params.city, date_from = date_from, date_to=date_to, interval=params.interval).__give_prediction__()
