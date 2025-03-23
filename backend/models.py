@@ -156,12 +156,9 @@ class base:
             ]
         ]
 
-        print(daily_dataframe)
-
         today_hours = daily_dataframe[:24]
         first_6_hours = daily_dataframe[["temperature_2m", "weather_code"]][:13]
         remaining_hours = daily_dataframe[1:]
-
         # remaining_hours.index = pd.to_datetime(remaining_hours.index)
 
         grouped_remaining_hours = remaining_hours.groupby(pd.Grouper(freq="12h")).agg(
@@ -174,13 +171,9 @@ class base:
                 "weather_code": lambda x: x.mode()[0],
             }
         )
-
-        today_hours["temperature_night_2m"] = today_hours["temperature_2m"].shift(1)
-
         grouped_today_hours = today_hours.groupby(pd.Grouper(freq="24h")).agg(
             {
                 "temperature_2m": "mean",
-                "temperature_night_2m": "mean",
                 "relative_humidity_2m": "mean",
                 "wind_speed_10m": "mean",
                 "wind_direction_10m": "mean",
@@ -188,14 +181,17 @@ class base:
                 "weather_code": lambda x: x.mode()[0],
             }
         )
-
+        
+        grouped_today_hours["temperature_night_2m"] = grouped_today_hours["temperature_2m"].shift(1)
+        
         grouped_today_hours = grouped_today_hours[1:]
 
-        # print(grouped_today_hours)
+        print(grouped_today_hours)
 
         grouped_remaining_hours["temperature_night_2m"] = grouped_remaining_hours[
             "temperature_2m"
         ].shift(1)
+        
         grouped_remaining_hours = grouped_remaining_hours[1:]
         # print(grouped_remaining_hours)
         grouped_remaining_hours = grouped_remaining_hours[
@@ -292,8 +288,6 @@ class base:
         grouped_remaining_hours = group_by_day(grouped_remaining_hours)
 
         grouped_today_hours = group_by_time_today(grouped_today_hours)
-
-        print(grouped_today_hours)
 
         result = {
             "today": grouped_today_hours,
